@@ -4,14 +4,9 @@
 #pragma once
 
 #include <cstdint>
-#include <map>
 #include <optional>
 #include <string>
 #include <vector>
-
-#ifndef _WIN32
-#  include <sys/types.h>
-#endif
 
 enum class UrlLayout {
   BAZEL,   // ac/ + 64 hex digits

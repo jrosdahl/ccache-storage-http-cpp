@@ -7,6 +7,7 @@
 #include "version.hpp"
 
 #include <algorithm>
+#include <cstdio>
 #include <cstring>
 #include <limits>
 #include <sstream>
@@ -230,6 +231,8 @@ void StorageClient::do_put(const std::string& hex_key, DataSlice&& data, Storage
   curl_easy_setopt(handle, CURLOPT_INFILESIZE_LARGE, filesize);
   curl_easy_setopt(handle, CURLOPT_READFUNCTION, read_callback);
   curl_easy_setopt(handle, CURLOPT_READDATA, request.get());
+  curl_easy_setopt(handle, CURLOPT_SEEKFUNCTION, seek_callback);
+  curl_easy_setopt(handle, CURLOPT_SEEKDATA, request.get());
   _active_requests[handle] = std::move(request);
   curl_multi_add_handle(_multi_handle, handle);
 }
@@ -526,4 +529,40 @@ size_t StorageClient::read_callback(char* ptr, size_t size, size_t nmemb, void* 
   }
 
   return to_copy;
+}
+
+int StorageClient::seek_callback(void* userdata, curl_off_t offset, int origin)
+{
+  auto* request = static_cast<HttpRequest*>(userdata);
+
+  auto seek_from = [request, offset](uintmax_t base) {
+    uintmax_t position;
+    if (offset < 0) {
+      uintmax_t backward = static_cast<uintmax_t>(-(offset + 1)) + 1;
+      if (backward > base) {
+        return CURL_SEEKFUNC_FAIL;
+      }
+      position = base - backward;
+    } else {
+      uintmax_t forward = static_cast<uintmax_t>(offset);
+      if (forward > request->request_data.size - base) {
+        return CURL_SEEKFUNC_FAIL;
+      }
+      position = base + forward;
+    }
+
+    request->upload_pos = static_cast<size_t>(position);
+    return CURL_SEEKFUNC_OK;
+  };
+
+  switch (origin) {
+  case SEEK_SET:
+    return seek_from(0);
+  case SEEK_CUR:
+    return seek_from(request->upload_pos);
+  case SEEK_END:
+    return seek_from(request->request_data.size);
+  default:
+    return CURL_SEEKFUNC_FAIL;
+  }
 }

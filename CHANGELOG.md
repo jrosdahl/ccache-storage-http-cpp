@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 
 - Fix libuv handle shutdown ordering.
+- Fix PUT seek handling after redirect.
 
 ## [0.8] - 2026-05-18
 

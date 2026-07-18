@@ -473,6 +473,28 @@ class StorageHelperIntegrationTest(unittest.TestCase):
         )
         self.assertEqual(server.requests[0].body, payload)
 
+    def test_put_overwrite_follows_redirect_and_replays_body(self):
+        payload = b"redirected-entry"
+        routes = {
+            ("PUT", "/1234"): ResponseSpec(
+                status=307, headers={"Location": "/redirected"}
+            ),
+            ("PUT", "/redirected"): ResponseSpec(status=201),
+        }
+        with (
+            StubHttpServer(routes) as server,
+            HelperProcess(BINARY_PATH, server.base_url) as helper,
+        ):
+            status, error = helper.put("1234", payload, overwrite=True)
+
+        self.assertEqual(status, STATUS_OK)
+        self.assertIsNone(error)
+        self.assertEqual(
+            [(request.method, request.path) for request in server.requests],
+            [("PUT", "/1234"), ("PUT", "/redirected")],
+        )
+        self.assertEqual(server.requests[1].body, payload)
+
     def test_put_without_overwrite_checks_head_before_put(self):
         payload = b"write-after-head"
         routes = {

@@ -86,6 +86,7 @@ private:
   static int timer_callback(CURLM* multi, long timeout_ms, void* userp);
   static size_t write_callback(char* ptr, size_t size, size_t nmemb, void* userdata);
   static size_t read_callback(char* ptr, size_t size, size_t nmemb, void* userdata);
+  static int seek_callback(void* userdata, curl_off_t offset, int origin);
 
   // Static callbacks for libuv:
   static void on_timeout(uv_timer_t* handle);

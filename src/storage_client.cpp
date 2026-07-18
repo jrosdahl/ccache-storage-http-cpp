@@ -28,15 +28,16 @@ static std::string build_url(const Config& config, const std::string& hex_key)
 
   switch (config.layout) {
   case UrlLayout::BAZEL: {
-    // Bazel format: ac/ + 64 hex digits, so pad shorter keys by repeating the key prefix to reach
-    // the expected SHA256 size.
+    // Bazel format: ac/ + 64 hex digits, so pad shorter keys by repeating the key to reach the
+    // expected SHA256 size.
     constexpr size_t sha256_hex_size = 64;
-    url << "ac/";
-    if (hex_key.size() >= sha256_hex_size) {
-      url << hex_key.substr(0, sha256_hex_size);
-    } else {
-      url << hex_key << hex_key.substr(0, sha256_hex_size - hex_key.size());
+    std::string bazel_key;
+    if (!hex_key.empty()) {
+      while (bazel_key.size() < sha256_hex_size) {
+        bazel_key.append(hex_key, 0, sha256_hex_size - bazel_key.size());
+      }
     }
+    url << "ac/" << bazel_key;
     break;
   }
 

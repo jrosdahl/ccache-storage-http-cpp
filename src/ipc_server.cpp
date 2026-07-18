@@ -210,6 +210,11 @@ void IpcServer::on_client_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
   if (nread > 0) {
     ClientConnection* client = static_cast<ClientConnection*>(stream->data);
     IpcServer* server = client->server;
+    if (client->request_in_flight) {
+      LOG("Client sent a request before the previous request completed");
+      close_client(*client);
+      return;
+    }
     server->reset_idle_timer();
     client->read_buf.insert(client->read_buf.end(), buf->base, buf->base + nread);
     server->process_client_data(*client);
@@ -252,7 +257,9 @@ void IpcServer::process_client_data(ClientConnection& client)
       }
       LOG("EXISTS request for key " + hex_key);
       auto client_ptr = client.shared_from_this();
+      client.request_in_flight = true;
       _storage_client.exists(hex_key, [this, client_ptr](StorageResponse&& response) {
+        client_ptr->request_in_flight = false;
         if (client_ptr->disconnected) {
           return;
         }
@@ -298,7 +305,9 @@ void IpcServer::process_client_data(ClientConnection& client)
       }
       LOG("GET request for key " + hex_key);
       auto client_ptr = client.shared_from_this();
+      client.request_in_flight = true;
       _storage_client.get(hex_key, [this, client_ptr](StorageResponse&& response) {
+        client_ptr->request_in_flight = false;
         if (client_ptr->disconnected) {
           return;
         }
@@ -351,8 +360,10 @@ void IpcServer::process_client_data(ClientConnection& client)
       LOG("PUT request for key " + hex_key + " (" + std::to_string(value_len) + " bytes)");
 
       auto client_ptr = client.shared_from_this();
+      client.request_in_flight = true;
       _storage_client.put(
         hex_key, std::move(put_data), overwrite, [this, client_ptr](StorageResponse&& response) {
+          client_ptr->request_in_flight = false;
           if (client_ptr->disconnected) {
             return;
           }
@@ -368,7 +379,9 @@ void IpcServer::process_client_data(ClientConnection& client)
       }
       LOG("REMOVE request for key " + hex_key);
       auto client_ptr = client.shared_from_this();
+      client.request_in_flight = true;
       _storage_client.remove(hex_key, [this, client_ptr](StorageResponse&& response) {
+        client_ptr->request_in_flight = false;
         if (client_ptr->disconnected) {
           return;
         }
@@ -390,6 +403,11 @@ void IpcServer::process_client_data(ClientConnection& client)
     }
 
     buf.erase(buf.begin(), buf.begin() + offset);
+    if (!buf.empty()) {
+      LOG("Client pipelined requests");
+      close_client(client);
+      return;
+    }
   }
 }
 

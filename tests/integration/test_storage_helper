@@ -457,6 +457,21 @@ class StorageHelperIntegrationTest(unittest.TestCase):
             [("HEAD", "/feed")],
         )
 
+    def test_pipelined_requests_close_client_connection(self):
+        request = bytes((REQ_EXISTS, 1, 0xAB))
+        with (
+            StubHttpServer({("HEAD", "/ab"): ResponseSpec(status=200)}) as server,
+            HelperProcess(BINARY_PATH, server.base_url) as helper,
+        ):
+            helper._socket.sendall(request + request)
+            self.assertEqual(helper._socket.recv(1), b"")
+            helper._socket.close()
+
+            helper._socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            helper._socket.connect(str(helper._socket_path))
+            helper.greeting = helper._read_greeting()
+            helper.stop()
+
     def test_put_overwrite_sends_body(self):
         payload = b"new-entry"
         with (

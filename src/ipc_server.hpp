@@ -23,6 +23,7 @@ struct ClientConnection : public std::enable_shared_from_this<ClientConnection>
   std::vector<uint8_t> read_buf;
   std::vector<char> alloc_buf; // Reusable buffer for libuv reads
   bool writing = false;
+  bool request_in_flight = false;
   bool disconnected = false; // Set when client disconnects, prevents sending to closed pipe
   std::vector<std::vector<uint8_t>> write_queue;
 };

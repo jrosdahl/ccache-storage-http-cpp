@@ -65,6 +65,17 @@ StorageClient::StorageClient(uv_loop_t& loop, const Config& config)
 
 StorageClient::~StorageClient()
 {
+  shut_down();
+  curl_global_cleanup();
+}
+
+void StorageClient::shut_down()
+{
+  if (_shut_down) {
+    return;
+  }
+  _shut_down = true;
+
   if (_multi_handle) {
     for (auto& pair : _active_requests) {
       curl_multi_remove_handle(_multi_handle, pair.first);
@@ -75,8 +86,14 @@ StorageClient::~StorageClient()
     }
     _active_requests.clear();
     curl_multi_cleanup(_multi_handle);
+    _multi_handle = nullptr;
   }
-  curl_global_cleanup();
+
+  if (_timeout_timer.data) {
+    uv_timer_stop(&_timeout_timer);
+    uv_close(reinterpret_cast<uv_handle_t*>(&_timeout_timer), nullptr);
+    _timeout_timer.data = nullptr;
+  }
 }
 
 bool StorageClient::init()
@@ -101,7 +118,13 @@ bool StorageClient::init()
   curl_multi_setopt(_multi_handle, CURLMOPT_MAX_HOST_CONNECTIONS, connection_pool_size);
   curl_multi_setopt(_multi_handle, CURLMOPT_MAXCONNECTS, connection_pool_size);
 
-  uv_timer_init(&_loop, &_timeout_timer);
+  int uv_result = uv_timer_init(&_loop, &_timeout_timer);
+  if (uv_result != 0) {
+    LOG("Failed to initialize curl timeout timer: " + std::string(uv_strerror(uv_result)));
+    curl_multi_cleanup(_multi_handle);
+    _multi_handle = nullptr;
+    return false;
+  }
   _timeout_timer.data = this;
 
   return true;

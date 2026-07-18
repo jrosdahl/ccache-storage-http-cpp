@@ -48,44 +48,38 @@ int main()
     return 1;
   }
 
-  StorageClient storage_client(*loop, *config);
-  if (!storage_client.init()) {
-    LOG("Error: failed to initialize storage client");
-    return 1;
-  }
+  int exit_code = 1;
+  {
+    StorageClient storage_client(*loop, *config);
+    IpcServer ipc_server(*loop, *config, storage_client);
 
-  IpcServer ipc_server(*loop, *config, storage_client);
-  if (!ipc_server.init()) {
-    LOG("Error: failed to initialize IPC server");
-    return 1;
-  }
-
+    if (!storage_client.init()) {
+      LOG("Error: failed to initialize storage client");
+    } else if (!ipc_server.init()) {
+      LOG("Error: failed to initialize IPC server");
+    } else {
 #ifdef _WIN32
-  if (_chdir("C:\\") != 0) {
-    LOG("Failed to chdir to C:\\");
-  }
+      if (_chdir("C:\\") != 0) {
+        LOG("Failed to chdir to C:\\");
+      }
 #else
-  if (chdir("/") != 0) {
-    LOG("Failed to chdir to /");
-  }
+      if (chdir("/") != 0) {
+        LOG("Failed to chdir to /");
+      }
 #endif
 
-  int result = uv_run(loop, UV_RUN_DEFAULT);
-  LOG("Event loop exited with code " + std::to_string(result));
+      int result = uv_run(loop, UV_RUN_DEFAULT);
+      LOG("Event loop exited with code " + std::to_string(result));
+      exit_code = 0;
+    }
 
-  uv_walk(
-    loop,
-    [](uv_handle_t* handle, void* /*arg*/) {
-      if (!uv_is_closing(handle)) {
-        uv_close(handle, nullptr);
-      }
-    },
-    nullptr);
+    ipc_server.shut_down();
+    storage_client.shut_down();
+    uv_run(loop, UV_RUN_DEFAULT); // process close callbacks
+  }
 
-  // Run loop again to process close callbacks.
-  uv_run(loop, UV_RUN_DEFAULT);
   uv_loop_close(loop);
 
   LOG("Shutdown complete");
-  return 0;
+  return exit_code;
 }

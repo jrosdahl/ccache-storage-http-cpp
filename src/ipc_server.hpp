@@ -34,6 +34,7 @@ public:
 
   bool init();
   void stop();
+  void shut_down();
   void reset_idle_timer();
 
   template<typename T> void send_response(ClientConnection& client, T&& data)
@@ -63,7 +64,7 @@ private:
   uv_loop_t& _loop;
   const Config& _config;
   StorageClient& _storage_client;
-  uv_pipe_t _server_pipe;
-  uv_timer_t _idle_timer;
+  uv_pipe_t _server_pipe{};
+  uv_timer_t _idle_timer{};
   std::unordered_map<uv_pipe_t*, std::shared_ptr<ClientConnection>> _clients;
 };

@@ -65,6 +65,7 @@ public:
   ~StorageClient();
 
   bool init();
+  void shut_down();
 
   void exists(const std::string& hex_key, StorageCallback&& callback);
   void get(const std::string& hex_key, StorageCallback&& callback);
@@ -93,6 +94,7 @@ private:
   uv_loop_t& _loop;
   const Config& _config;
   CURLM* _multi_handle = nullptr;
-  uv_timer_t _timeout_timer;
+  uv_timer_t _timeout_timer{};
+  bool _shut_down = false;
   std::unordered_map<CURL*, std::unique_ptr<HttpRequest>> _active_requests;
 };

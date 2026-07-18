@@ -118,6 +118,26 @@ void IpcServer::stop()
   uv_stop(&_loop); // unlinks the socket as well
 }
 
+void IpcServer::shut_down()
+{
+  for (auto& pair : _clients) {
+    close_client(*pair.second);
+  }
+
+  auto* idle_timer = reinterpret_cast<uv_handle_t*>(&_idle_timer);
+  if (_idle_timer.data && !uv_is_closing(idle_timer)) {
+    uv_timer_stop(&_idle_timer);
+    uv_close(idle_timer, nullptr);
+  }
+  _idle_timer.data = nullptr;
+
+  auto* server_pipe = reinterpret_cast<uv_handle_t*>(&_server_pipe);
+  if (_server_pipe.data && !uv_is_closing(server_pipe)) {
+    uv_close(server_pipe, nullptr);
+  }
+  _server_pipe.data = nullptr;
+}
+
 void IpcServer::reset_idle_timer()
 {
   if (_config.idle_timeout_seconds == 0) {

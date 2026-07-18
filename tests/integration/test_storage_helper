@@ -227,6 +227,7 @@ class HelperProcess:
                     self._process.stdout.close()
                 if self._process.stderr is not None:
                     self._process.stderr.close()
+                assert self._process.returncode == 0
             shutil.rmtree(self._tmpdir, ignore_errors=True)
         return False
 

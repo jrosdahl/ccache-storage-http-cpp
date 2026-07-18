@@ -30,10 +30,11 @@ ccache_storage_http = executable(
 )
 
 if host_machine.system() == 'windows'
-  fs = import('fs')
-  fs.copyfile(
-    ccache_storage_http.full_path(),
-    'ccache-storage-https.exe',
+  custom_target(
+    'ccache-storage-https',
+    input: ccache_storage_http,
+    output: 'ccache-storage-https.exe',
+    command: [find_program('cmd'), '/c', 'copy', '/Y', '@INPUT@', '@OUTPUT@'],
     install: true,
     install_dir: get_option('bindir'),
   )

@@ -115,7 +115,7 @@ bool IpcServer::init()
 void IpcServer::stop()
 {
   LOG("Shutting down");
-  uv_stop(&_loop); // unlinks the socket as well
+  uv_stop(&_loop);
 }
 
 void IpcServer::shut_down()
@@ -133,7 +133,7 @@ void IpcServer::shut_down()
 
   auto* server_pipe = reinterpret_cast<uv_handle_t*>(&_server_pipe);
   if (_server_pipe.data && !uv_is_closing(server_pipe)) {
-    uv_close(server_pipe, nullptr);
+    uv_close(server_pipe, nullptr); // unlinks the socket as well
   }
   _server_pipe.data = nullptr;
 }

@@ -138,6 +138,10 @@ void IpcServer::shut_down()
   _server_pipe.data = nullptr;
 }
 
+// Note: The timer is only reset between requests, so it can fire while a
+// request slower than the idle timeout is still in flight. This is not a
+// problem in practice since ccache normally closes the connection on slow
+// requests much earlier than the idle timeout.
 void IpcServer::reset_idle_timer()
 {
   if (_config.idle_timeout_seconds == 0) {

@@ -450,7 +450,7 @@ void IpcServer::flush_write_queue(ClientConnection& client)
   int r = uv_write(write_req.get(), stream, &buf, 1, on_write_complete);
   if (r != 0) {
     LOG("Write error: " + std::string(uv_strerror(r)));
-    client.writing = false;
+    close_client(client);
     return;
   }
 

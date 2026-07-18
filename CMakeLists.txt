@@ -1,7 +1,8 @@
+cmake_minimum_required(VERSION 3.16)
+
 file(READ "${CMAKE_SOURCE_DIR}/version.txt" PROJECT_VERSION_RAW)
 string(STRIP "${PROJECT_VERSION_RAW}" PROJECT_VERSION)
 
-cmake_minimum_required(VERSION 3.16)
 project(ccache-storage-http-cpp VERSION "${PROJECT_VERSION}" LANGUAGES CXX)
 
 enable_testing()

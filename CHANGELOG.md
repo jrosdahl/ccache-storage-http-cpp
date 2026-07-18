@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Fix PUT seek handling after redirect.
 - Fix bazel key padding for short keys.
 - Close IPC client connection on write failure.
+- Only close client connection instead of whole server on unknown request.
 
 ## [0.8] - 2026-05-18
 

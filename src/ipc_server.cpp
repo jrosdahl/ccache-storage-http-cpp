@@ -385,7 +385,7 @@ void IpcServer::process_client_data(ClientConnection& client)
 
     default:
       LOG("Unknown request type: " + std::to_string(request_type));
-      stop();
+      close_client(client);
       return;
     }
 

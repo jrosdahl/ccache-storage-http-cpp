@@ -28,6 +28,10 @@ struct Config
   std::vector<std::pair<std::string, std::string>> headers;
   bool use_netrc = false;
   std::optional<std::string> netrc_file;
+
+  // TLS certificate store overrides from the environment.
+  std::optional<std::string> ssl_cert_file;
+  std::optional<std::string> ssl_cert_dir;
 };
 
 std::optional<Config> parse_config();

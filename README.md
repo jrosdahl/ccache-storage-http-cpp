@@ -130,6 +130,14 @@ export CCACHE_REMOTE_STORAGE="https://cache.example.com @use-netrc"
 export CCACHE_REMOTE_STORAGE="https://cache.example.com @netrc-file=/path/to/my-netrc"
 ```
 
+### Custom CA store
+
+Set `SSL_CERT_FILE` to a CA certificate bundle or `SSL_CERT_DIR` to a CA
+certificate directory to override the CA store used for HTTPS requests.
+
+Note: The helper process is spawned by ccache, so these variables must be set
+before ccache is invoked.
+
 ## Optional debug logging
 
 You can set the `CRSH_LOGFILE` environment variable to enable debug logging to a

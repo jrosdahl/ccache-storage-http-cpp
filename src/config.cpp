@@ -7,7 +7,7 @@
 
 #include <charconv>
 #include <cstdlib>
-#include <sstream>
+#include <filesystem>
 #include <string_view>
 
 template<typename T> std::optional<T> parse_int(std::string_view str, int base = 10)
@@ -111,7 +111,17 @@ std::optional<Config> parse_config()
     LOG("Attribute: " + key_str + "=" + value_str);
 
     if (key_str == "bearer-token") {
-      config.bearer_token = value_str;
+      if (value_str.empty()) {
+        config.diagnostics.push_back("error: bearer-token cannot be empty");
+      } else {
+        config.bearer_token = value_str;
+      }
+    } else if (key_str == "bearer-token-file") {
+      if (value_str.empty()) {
+        config.diagnostics.push_back("error: bearer-token-file cannot be empty");
+      } else {
+        config.bearer_token_file = value_str;
+      }
     } else if (key_str == "header") {
       size_t eq_pos = value_str.find('=');
       if (eq_pos != std::string::npos) {
@@ -135,6 +145,23 @@ std::optional<Config> parse_config()
       config.netrc_file = value_str;
     } else {
       config.diagnostics.push_back("warning: unknown attribute: " + key_str);
+    }
+  }
+
+  if (config.bearer_token && config.bearer_token_file) {
+    config.diagnostics.push_back("warning: bearer-token-file overrides bearer-token");
+  }
+
+  if (config.bearer_token_file) {
+    // The helper changes its working directory to the filesystem root after
+    // configuration, so resolve a relative path to absolute here.
+    std::error_code ec;
+    auto abs_path = std::filesystem::absolute(*config.bearer_token_file, ec);
+    if (ec) {
+      config.diagnostics.push_back("error: failed to resolve bearer token file \""
+                                   + *config.bearer_token_file + "\": " + ec.message());
+    } else {
+      config.bearer_token_file = abs_path.string();
     }
   }
 

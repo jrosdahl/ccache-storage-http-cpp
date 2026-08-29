@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Support for `SSL_CERT_FILE` and `SSL_CERT_DIR` environment variables for
   custom CA store.
+- New `bearer-token-file` attribute for reading the bearer token from a file
+  for each request, so that the token can be rotated without restarting the
+  helper.
 
 ## [0.9] - 2026-07-18
 

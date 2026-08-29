@@ -7,13 +7,41 @@
 #include "version.hpp"
 
 #include <algorithm>
+#include <cctype>
 #include <cstdio>
 #include <cstring>
+#include <fstream>
+#include <iterator>
 #include <limits>
 #include <sstream>
 #include <thread>
 
 namespace {
+
+static std::optional<std::string> read_bearer_token_file(const std::string& path)
+{
+  std::ifstream file(path, std::ios::binary);
+  if (!file) {
+    LOG("Failed to open bearer token file \"" + path + "\"");
+    return std::nullopt;
+  }
+
+  std::string token((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+  if (file.bad()) {
+    LOG("Failed to read bearer token file \"" + path + "\"");
+    return std::nullopt;
+  }
+
+  auto not_space = [](unsigned char c) { return !std::isspace(c); };
+  token.erase(token.begin(), std::find_if(token.begin(), token.end(), not_space));
+  token.erase(std::find_if(token.rbegin(), token.rend(), not_space).base(), token.end());
+
+  if (token.empty()) {
+    LOG("Bearer token file \"" + path + "\" is empty after stripping whitespace");
+    return std::nullopt;
+  }
+  return token;
+}
 
 static std::string build_url(const Config& config, const std::string& hex_key)
 {
@@ -61,7 +89,8 @@ static std::string build_url(const Config& config, const std::string& hex_key)
 
 StorageClient::StorageClient(uv_loop_t& loop, const Config& config)
   : _loop(loop),
-    _config(config)
+    _config(config),
+    _bearer_token(config.bearer_token)
 {
 }
 
@@ -297,8 +326,10 @@ CURL* StorageClient::create_easy_handle(HttpRequest* request)
 
   curl_slist* headers = nullptr;
 
-  if (_config.bearer_token) {
-    std::string auth_header = "Authorization: Bearer " + *_config.bearer_token;
+  refresh_bearer_token();
+
+  if (_bearer_token) {
+    std::string auth_header = "Authorization: Bearer " + *_bearer_token;
     headers = curl_slist_append(headers, auth_header.c_str());
   }
 
@@ -313,6 +344,31 @@ CURL* StorageClient::create_easy_handle(HttpRequest* request)
   }
 
   return handle;
+}
+
+void StorageClient::refresh_bearer_token()
+{
+  if (!_config.bearer_token_file) {
+    return;
+  }
+
+  std::error_code ec;
+  auto mtime = std::filesystem::last_write_time(*_config.bearer_token_file, ec);
+  if (ec) {
+    _bearer_token_file_mtime.reset();
+    LOG("Failed to stat bearer token file \"" + *_config.bearer_token_file + "\": " + ec.message());
+    return;
+  }
+
+  if (_bearer_token_file_mtime && mtime == *_bearer_token_file_mtime) {
+    return;
+  }
+  _bearer_token_file_mtime = mtime;
+
+  auto token = read_bearer_token_file(*_config.bearer_token_file);
+  if (token) {
+    _bearer_token = std::move(token);
+  }
 }
 
 CurlSocketContext* StorageClient::create_socket_context(curl_socket_t sockfd)

@@ -9,6 +9,7 @@
 #include <uv.h>
 
 #include <cstdint>
+#include <filesystem>
 #include <functional>
 #include <memory>
 #include <string>
@@ -76,8 +77,8 @@ public:
 private:
   void do_put(const std::string& hex_key, DataSlice&& data, StorageCallback&& callback);
   void check_multi_info();
-
   CURL* create_easy_handle(HttpRequest* request);
+  void refresh_bearer_token();
   CurlSocketContext* create_socket_context(curl_socket_t sockfd);
   void destroy_socket_context(CurlSocketContext* ctx);
 
@@ -94,6 +95,8 @@ private:
 
   uv_loop_t& _loop;
   const Config& _config;
+  std::optional<std::string> _bearer_token;
+  std::optional<std::filesystem::file_time_type> _bearer_token_file_mtime;
   CURLM* _multi_handle = nullptr;
   uv_timer_t _timeout_timer{};
   bool _shut_down = false;

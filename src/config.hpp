@@ -24,6 +24,7 @@ struct Config
 
   // Attributes from CRSH_ATTR_*
   std::optional<std::string> bearer_token;
+  std::optional<std::string> bearer_token_file;
   UrlLayout layout = UrlLayout::SUBDIRS;
   std::vector<std::pair<std::string, std::string>> headers;
   bool use_netrc = false;

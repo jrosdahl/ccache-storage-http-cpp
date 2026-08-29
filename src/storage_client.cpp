@@ -280,6 +280,14 @@ CURL* StorageClient::create_easy_handle(HttpRequest* request)
   curl_easy_setopt(handle, CURLOPT_WRITEDATA, request);
   curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, write_callback);
 
+  if (_config.ssl_cert_file) {
+    curl_easy_setopt(handle, CURLOPT_CAINFO, _config.ssl_cert_file->c_str());
+  }
+
+  if (_config.ssl_cert_dir) {
+    curl_easy_setopt(handle, CURLOPT_CAPATH, _config.ssl_cert_dir->c_str());
+  }
+
   if (_config.use_netrc) {
     curl_easy_setopt(handle, CURLOPT_NETRC, CURL_NETRC_OPTIONAL);
     if (_config.netrc_file) {

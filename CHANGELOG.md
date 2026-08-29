@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+
+- Support for `SSL_CERT_FILE` and `SSL_CERT_DIR` environment variables for
+  custom CA store.
+
 ## [0.9] - 2026-07-18
 
 [0.9]: https://github.com/ccache/ccache-storage-http-cpp/releases/tag/v0.9

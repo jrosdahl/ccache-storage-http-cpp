@@ -69,6 +69,16 @@ std::optional<Config> parse_config()
   config.idle_timeout_seconds = *idle_val;
   LOG("Idle timeout: " + std::to_string(config.idle_timeout_seconds));
 
+  const char* ssl_cert_file = std::getenv("SSL_CERT_FILE");
+  if (ssl_cert_file && ssl_cert_file[0] != '\0') {
+    config.ssl_cert_file = ssl_cert_file;
+  }
+
+  const char* ssl_cert_dir = std::getenv("SSL_CERT_DIR");
+  if (ssl_cert_dir && ssl_cert_dir[0] != '\0') {
+    config.ssl_cert_dir = ssl_cert_dir;
+  }
+
   const char* num_attr_str = std::getenv("CRSH_NUM_ATTR");
   if (!num_attr_str || num_attr_str[0] == '\0') {
     num_attr_str = "0";

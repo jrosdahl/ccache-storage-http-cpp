@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [0.9] - 2026-07-18
 
+[0.9]: https://github.com/ccache/ccache-storage-http-cpp/releases/tag/v0.9
+
 ### Fixed
 
 - Fix libuv handle shutdown ordering.
@@ -17,6 +19,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [0.8] - 2026-05-18
 
+[0.8]: https://github.com/ccache/ccache-storage-http-cpp/releases/tag/v0.8
+
 ### Added
 
 - Support for info operation.
@@ -27,6 +31,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Support for experimental CRSH greeting message format 2.
 
 ## [0.7] - 2026-05-10
+
+[0.7]: https://github.com/ccache/ccache-storage-http-cpp/releases/tag/v0.7
 
 ### Added
 
@@ -40,6 +46,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Increase uv_listen backlog to 4096.
 
 ## [0.6] - 2026-04-22
+
+[0.6]: https://github.com/ccache/ccache-storage-http-cpp/releases/tag/v0.6
 
 ### Added
 
@@ -61,6 +69,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [0.5] - 2026-03-18
 
+[0.5]: https://github.com/ccache/ccache-storage-http-cpp/releases/tag/v0.5
+
 ### Added
 
 - tar.gz release archive.
@@ -72,11 +82,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [0.4] - 2026-03-15
 
+[0.4]: https://github.com/ccache/ccache-storage-http-cpp/releases/tag/v0.4
+
 ### Changed
 
 - Set `User-Agent` header to `ccache-storage-http-cpp/$VERSION` in HTTP requests.
 
 ## [0.3] - 2026-03-07
+
+[0.3]: https://github.com/ccache/ccache-storage-http-cpp/releases/tag/v0.3
 
 ### Added
 
@@ -88,6 +102,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Correct `<string_view>` includes.
 
 ## [0.2] - 2026-03-05
+
+[0.2]: https://github.com/ccache/ccache-storage-http-cpp/releases/tag/v0.2
 
 ### Added
 
@@ -101,17 +117,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [0.1] - 2026-01-18
 
+[0.1]: https://github.com/ccache/ccache-storage-http-cpp/releases/tag/v0.1
+
 ### Added
 
 - First version.
-
-[Unreleased]: https://github.com/ccache/ccache-storage-http-cpp/compare/v0.9...HEAD
-[0.9]: https://github.com/ccache/ccache-storage-http-cpp/releases/tag/v0.9
-[0.8]: https://github.com/ccache/ccache-storage-http-cpp/releases/tag/v0.8
-[0.7]: https://github.com/ccache/ccache-storage-http-cpp/releases/tag/v0.7
-[0.6]: https://github.com/ccache/ccache-storage-http-cpp/releases/tag/v0.6
-[0.5]: https://github.com/ccache/ccache-storage-http-cpp/releases/tag/v0.5
-[0.4]: https://github.com/ccache/ccache-storage-http-cpp/releases/tag/v0.4
-[0.3]: https://github.com/ccache/ccache-storage-http-cpp/releases/tag/v0.3
-[0.2]: https://github.com/ccache/ccache-storage-http-cpp/releases/tag/v0.2
-[0.1]: https://github.com/ccache/ccache-storage-http-cpp/releases/tag/v0.1
